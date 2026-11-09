@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07111f">
+<title>ZD Brain Master | Version 2.3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07111f;--panel:#142338;--panel2:#1b304b;--gold:#f7c948;--muted:#b7c4d5;--line:#344c68}
+body{background:var(--bg);color:#fff;font-family:Arial,sans-serif;min-height:100vh;padding:15px}
+.container{max-width:520px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 0 22px;gap:10px}
+.logo{font-size:18px;font-weight:800;color:var(--gold);letter-spacing:.4px}
+.header-actions{display:flex;align-items:center;gap:8px}
+.coins,.sound-toggle{background:#17263a;border:1px solid #dcae32;padding:9px 12px;border-radius:20px;color:var(--gold);font-weight:bold}
+.sound-toggle{cursor:pointer}
+.screen{display:none}.screen.active{display:block}
+.hero{text-align:center;padding:23px 10px}
+.hero h1{font-size:clamp(25px,7vw,33px);color:var(--gold);margin-bottom:10px}
+.hero p{color:var(--muted);line-height:1.5}
+.player-card{background:linear-gradient(135deg,#1b304b,#101d30);border:1px solid var(--line);padding:18px;border-radius:15px;margin:15px 0}
+.player-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.player-id{display:flex;align-items:center;gap:12px;min-width:0}
+.avatar{width:52px;height:52px;flex-shrink:0;border-radius:50%;background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold}
+.player-name{color:var(--gold);font-size:18px;font-weight:bold;overflow-wrap:anywhere}
+.player-level{color:var(--muted);font-size:12px;margin-top:5px}
+.xp-label{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;margin:17px 0 8px}
+.xp-bg,.progress-bg{height:10px;background:#07111f;border-radius:20px;overflow:hidden}
+.xp-fill,.progress{height:100%;width:0%;background:var(--gold);transition:width .35s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}
+.stat{background:var(--panel);padding:14px 5px;text-align:center;border-radius:12px}
+.stat strong{display:block;color:var(--gold);font-size:21px;margin-bottom:5px}
+.stat small{color:var(--muted);font-size:10px}
+.section-title{margin:22px 0 12px;color:var(--gold);font-size:16px}
+.difficulties{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.difficulty,.category{background:var(--panel);border:2px solid transparent;color:#fff;cursor:pointer}
+.difficulty{padding:13px 5px;border-radius:10px}
+.difficulty small{color:var(--muted)}
+.difficulty.selected,.category.selected{border-color:var(--gold);color:var(--gold);background:var(--panel2)}
+.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.category{border-radius:13px;padding:18px 9px;text-align:center}
+.category .emoji{font-size:29px;display:block;margin-bottom:8px}
+.category strong{font-size:14px}.category small{display:block;color:#aebdd0;margin-top:5px;font-size:11px}
+.btn{width:100%;padding:15px;border:0;border-radius:11px;background:var(--gold);color:#101827;font-size:15px;font-weight:bold;cursor:pointer;margin-top:14px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.secondary{background:#20334b;color:#fff;border:1px solid #415773}
+.btn.small{width:auto;padding:10px 12px;margin:0;font-size:11px;white-space:nowrap}
+.game-info{display:flex;justify-content:space-between;gap:6px;margin:14px 0;color:var(--gold);font-weight:bold;font-size:13px}
+.progress-bg{background:#23364d;margin-bottom:22px}
+.question-box{background:var(--panel);border-radius:15px;padding:25px 17px;margin:15px 0;min-height:135px;display:flex;align-items:center;justify-content:center;text-align:center}
+.question-box h2{font-size:21px;line-height:1.45}
+.answers{display:grid;gap:11px}
+.answer{background:var(--panel);border:2px solid #263c56;color:#fff;padding:15px;border-radius:10px;text-align:left;font-size:15px;cursor:pointer}
+.answer.correct{background:#145c3b;border-color:#35d48a}.answer.wrong{background:#642b35;border-color:#ff6578}
+.answer:disabled{cursor:not-allowed}
+.feedback{text-align:center;min-height:22px;margin-top:12px;color:var(--gold);font-size:13px;font-weight:bold}
+.result{text-align:center;padding:25px 10px}
+.result h1{color:var(--gold);font-size:29px;margin-bottom:13px}
+.result-score{font-size:48px;color:var(--gold);font-weight:bold;margin:18px 0}
+.result p{color:var(--muted);line-height:1.65}
+.result-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0}
+.result-stat{background:var(--panel);border-radius:12px;padding:13px}
+.result-stat strong{display:block;color:var(--gold);font-size:21px;margin-bottom:4px}
+.result-stat small{color:var(--muted);font-size:11px}
+.input-field{width:100%;background:var(--panel);border:1px solid #415773;color:#fff;border-radius:10px;padding:14px;font-size:16px;margin-top:12px;outline:none}
+.input-field:focus{border-color:var(--gold)}
+.profile-box{background:var(--panel);border-radius:14px;padding:18px;margin:15px 0}
+.achievement-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.achievement{background:var(--panel);border:1px solid var(--line);padding:14px 8px;border-radius:12px;text-align:center}
+.achievement.unlocked{border-color:var(--gold);background:var(--panel2)}
+.achievement .badge-icon{font-size:28px;display:block;margin-bottom:7px}
+.achievement strong{font-size:12px;display:block;margin-bottom:5px}
+.achievement small{color:#aebdd0;font-size:10px}
+.achievement.locked{opacity:.45}
+.note{font-size:11px;color:#91a2b8;line-height:1.5;margin-top:10px}
+.footer{text-align:center;color:#718096;font-size:11px;margin:32px 0 14px;line-height:1.7}
+@media(max-width:360px){body{padding:10px}.logo{font-size:15px}.player-name{font-size:16px}.question-box h2{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+ <div class="logo">ZD BRAIN MASTER</div>
+ <div class="header-actions">
+  <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" aria-label="Toggle sound">🔊 SOUND ON</button>
+  <div class="coins">🪙 <span id="coinCount">0</span></div>
+ </div>
+</header>
+
+<section id="homeScreen" class="screen active">
+ <div class="hero"><h1>THINK. PLAY. CONQUER.</h1><p>Challenge your brain. Test your intelligence. Become a master!</p></div>
+ <div class="player-card">
+  <div class="player-top">
+   <div class="player-id"><div class="avatar" id="homeAvatar">P</div><div><div class="player-name" id="homePlayerName">Player</div><div class="player-level" id="homePlayerLevel">LEVEL 1</div></div></div>
+   <button class="btn secondary small" onclick="openProfile()">MY PROFILE</button>
+  </div>
+  <div class="xp-label"><span>EXPERIENCE POINTS</span><span id="homeXP">0 / 100 XP</span></div>
+  <div class="xp-bg"><div class="xp-fill" id="homeXPBar"></div></div>
+ </div>
+ <div class="stats">
+  <div class="stat"><strong id="bestScore">0</strong><small>BEST SCORE</small></div>
+  <div class="stat"><strong id="totalGames">0</strong><small>GAMES PLAYED</small></div>
+  <div class="stat"><strong id="homeCoins">0</strong><small>TOTAL COINS</small></div>
+ </div>
+ <h3 class="section-title">SELECT DIFFICULTY</h3>
+ <div class="difficulties">
+  <button class="difficulty selected" data-level="easy">EASY<br><small>90 seconds</small></button>
+  <button class="difficulty" data-level="medium">MEDIUM<br><small>60 seconds</small></button>
+  <button class="difficulty" data-level="hard">HARD<br><small>40 seconds</small></button>
+ </div>
+ <h3 class="section-title">SELECT CATEGORY</h3>
+ <div class="categories">
+  <button class="category selected" data-category="math"><span class="emoji">🔢</span><strong>Mathematics</strong><small>Numbers and calculations</small></button>
+  <button class="category" data-category="logic"><span class="emoji">🧠</span><strong>Logic</strong><small>Think beyond the obvious</small></button>
+  <button class="category" data-category="riddles"><span class="emoji">🤔</span><strong>Riddles</strong><small>Test your reasoning</small></button>
+  <button class="category" data-category="general"><span class="emoji">🌍</span><strong>General Knowledge</strong><small>How much do you know?</small></button>
+ </div>
+ <button class="btn" onclick="startGame()">START GAME</button>
+ <p class="note">Each round contains 5 questions. Correct answers earn points, coins and XP. Build answer streaks to earn bonus points!</p>
+</section>
+
+<section id="gameScreen" class="screen">
+ <div class="game-info"><span>Q <span id="questionNumber">1</span>/5</span><span>⏱ <span id="timer">90</span>s</span><span>⭐ <span id="currentScore">0</span></span></div>
+ <div class="progress-bg"><div class="progress" id="progressBar"></div></div>
+ <div class="question-box"><h2 id="questionText">Question goes here</h2></div>
+ <div class="answers" id="answersContainer"></div>
+ <div class="feedback" id="feedback"></div>
+ <button class="btn secondary" onclick="quitGame()">QUIT GAME</button>
+</section>
+
+<section id="resultScreen" class="screen">
+ <div class="result">
+  <h1 id="resultTitle">GAME OVER!</h1><p>Your final score</p><div class="result-score" id="finalScore">0</div>
+  <p id="resultMessage"></p>
+  <div class="result-stats">
+   <div class="result-stat"><strong id="resultCorrect">0/5</strong><small>CORRECT ANSWERS</small></div>
+   <div class="result-stat"><strong id="resultAccuracy">0%</strong><small>ACCURACY</small></div>
+   <div class="result-stat"><strong id="earnedCoins">0</strong><small>COINS EARNED</small></div>
+   <div class="result-stat"><strong id="earnedXP">0</strong><small>XP EARNED</small></div>
+  </div>
+  <p id="levelMessage" style="color:#f7c948;margin-top:8px"></p>
+  <button class="btn" onclick="playAgain()">PLAY AGAIN</button>
+  <button class="btn secondary" onclick="goHome()">BACK TO HOME</button>
+ </div>
+</section>
+
+<section id="profileScreen" class="screen">
+ <h2 class="section-title">MY PLAYER PROFILE</h2>
+ <div class="profile-box" style="text-align:center">
+  <div class="avatar" id="profileAvatar" style="margin:0 auto 15px;width:75px;height:75px;font-size:32px">P</div>
+  <h2 id="profileDisplayName" style="color:#f7c948">Player</h2>
+  <p id="profileLevel" style="color:#b7c4d5;margin-top:8px">LEVEL 1</p>
+  <input type="text" id="playerNameInput" class="input-field" maxlength="20" placeholder="Enter your gaming name">
+  <button class="btn" onclick="saveProfile()">SAVE PLAYER NAME</button>
+ </div>
+ <h3 class="section-title">PLAYER STATISTICS</h3>
+ <div class="stats">
+  <div class="stat"><strong id="profileXP">0</strong><small>TOTAL XP</small></div>
+  <div class="stat"><strong id="profileGames">0</strong><small>GAMES</small></div>
+  <div class="stat"><strong id="profileCoins">0</strong><small>COINS</small></div>
+ </div>
+ <div class="profile-box">
+  <div class="xp-label"><span>LEVEL PROGRESS</span><span id="profileXPProgress">0 / 100 XP</span></div>
+  <div class="xp-bg"><div class="xp-fill" id="profileXPBar"></div></div>
+ </div>
+ <h3 class="section-title">ACHIEVEMENTS <span id="achievementCount" style="font-size:12px"></span></h3>
+ <div class="achievement-grid" id="achievementGrid"></div>
+ <button class="btn secondary" onclick="goHome()">BACK TO HOME</button>
+</section>
+
+<div class="footer">POWERED BY ZIONDESIGNS ENTERPRISE<br>THINK. PLAY. CONQUER. <br>VERSION 2.3</div>
+</div>
+
+<script>
+"use strict";
+
+// PLAYER DATA
+function readNumber(key){try{return Math.max(0,Number(localStorage.getItem(key))||0)}catch(e){return 0}}
+function readText(key,fallback=""){try{return localStorage.getItem(key)||fallback}catch(e){return fallback}}
+function readArray(key){try{const value=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(value)?value:[]}catch(e){return []}}
+let coins=readNumber("zdCoins"),bestScore=readNumber("zdBestScore"),totalGames=readNumber("zdGames"),totalXP=readNumber("zdXP");
+let totalCorrect=readNumber("zdTotalCorrect"),totalAnswered=readNumber("zdTotalAnswered");
+let playerName=readText("zdPlayerName"),achievements=readArray("zdAchievements");
+let soundEnabled=readText("zdSound","true")!=="false";
+
+// GAME STATE
+let selectedDifficulty="easy",selectedCategory="math",timeLeft=90,timerInterval=null,answerTimeout=null;
+let score=0,correctAnswers=0,currentQuestion=0,currentStreak=0,bestStreak=0,selectedQuestions=[],gameFinished=true;
+const TOTAL_QUESTIONS=5;
+
+// QUESTION BANK
+const questionBank={
+math:{
+easy:[
+["What is 12 × 5?",["50","60","65","55"],1],["What is 100 divided by 4?",["20","30","25","40"],2],
+["What is 15 + 27?",["40","42","45","41"],1],["What is 9 × 9?",["72","81","89","99"],1],
+["What is 144 divided by 12?",["10","11","12","14"],2],["What is 25% of 200?",["25","40","50","75"],2],
+["What is 18 + 19?",["35","36","37","38"],2]],
+medium:[
+["Solve: 15 × 12",["160","170","180","190"],2],["What is 35% of 400?",["120","130","140","150"],2],
+["Solve: 225 ÷ 15",["12","15","18","20"],1],["What is the square of 14?",["186","196","204","216"],1],
+["Solve: 3² + 4²",["12","25","49","16"],1],["What is 7/8 of 64?",["48","52","56","60"],2]],
+hard:[
+["Solve: 17 × 23",["381","391","401","411"],1],["What is the square root of 2025?",["35","40","45","55"],2],
+["Solve: 15% of 840",["116","126","136","146"],1],["If x + 7 = 19, what is 3x?",["30","33","36","39"],2],
+["Solve: 144 ÷ 0.12",["100","120","1200","1400"],2],["What is 2⁵ × 3?",["48","64","96","128"],2]]},
+logic:{
+easy:[
+["What comes next: 2, 4, 6, 8, ...?",["9","10","11","12"],1],["Which one does not belong?",["Apple","Mango","Carrot","Orange"],2],
+["If all cats are animals, is a cat an animal?",["Yes","No","Maybe","Never"],0],["What comes next: 5, 10, 15, 20, ...?",["22","25","30","35"],1],
+["You have 3 apples and take away 2. How many do you have?",["1","2","3","5"],1],["Which is heavier: 1kg of iron or 1kg of cotton?",["Iron","Cotton","Same weight","Cannot tell"],2]],
+medium:[
+["What comes next: 1, 4, 9, 16, ...?",["20","24","25","36"],2],["A farmer has 17 sheep. All but 9 run away. How many remain?",["8","9","17","0"],1],
+["Which number is different: 16, 25, 36, 48, 64?",["16","25","48","64"],2],["If yesterday was Monday, what day is tomorrow?",["Tuesday","Wednesday","Thursday","Sunday"],1],
+["Complete: 3, 6, 12, 24, ...",["36","42","48","50"],2],["A clock shows 3:00. What is the angle between its hands?",["45°","60°","90°","180°"],2]],
+hard:[
+["Complete: 2, 6, 12, 20, 30, ...",["36","40","42","44"],2],["If 5 machines make 5 items in 5 minutes, how long do 100 machines take to make 100 items?",["5 minutes","20 minutes","100 minutes","500 minutes"],0],
+["A number doubled and increased by 8 equals 30. What is it?",["9","10","11","12"],2],["What comes next: 1, 1, 2, 3, 5, 8, ...?",["11","12","13","15"],2],
+["You overtake the person in second place. What position are you now in?",["First","Second","Third","Fourth"],1],["If 3 pens cost ₦150, what do 8 pens cost?",["₦300","₦350","₦400","₦450"],2]]},
+riddles:{
+easy:[
+["What has keys but cannot open doors?",["A house","A piano","A car","A lock"],1],["What has a neck but no head?",["A bottle","A human","A bird","A tree"],0],
+["What gets wetter the more it dries?",["Water","A towel","A sponge","Rain"],1],["What has hands but cannot clap?",["A child","A clock","A monkey","A robot"],1],
+["What has one eye but cannot see?",["A needle","A person","A fish","A camera"],0],["What goes up but never comes down?",["A balloon","Your age","Smoke","A bird"],1]],
+medium:[
+["I have cities but no houses, forests but no trees. What am I?",["A map","A book","A globe","A painting"],0],["What can travel around the world while staying in one corner?",["A plane","A stamp","A compass","A letter"],1],
+["The more you take, the more you leave behind. What are they?",["Coins","Footsteps","Pictures","Memories"],1],["What belongs to you but other people use it more?",["Your phone","Your name","Your money","Your shoes"],1],
+["What has many teeth but cannot bite?",["A comb","A dog","A crocodile","A saw"],0],["What breaks without being held?",["A promise","A glass","A stick","A plate"],0]],
+hard:[
+["I speak without a mouth and hear without ears. What am I?",["A ghost","An echo","A radio","A dream"],1],["What disappears the moment you say its name?",["Darkness","Silence","Time","Light"],1],
+["A man shaves several times daily but still has a beard. Who is he?",["A barber","A soldier","A doctor","A farmer"],0],["What has 13 hearts but no other organs?",["A person","A deck of cards","A robot","A hospital"],1],
+["What can fill a room but takes up no space?",["Furniture","Light","Air","Smoke"],1],["I am always in front of you but cannot be seen. What am I?",["The past","The future","Your shadow","The wind"],1]]},
+general:{
+easy:[
+["What is the capital of Nigeria?",["Lagos","Kano","Abuja","Ibadan"],2],["How many days are in a leap year?",["364","365","366","367"],2],
+["Which planet is known as the Red Planet?",["Earth","Mars","Venus","Jupiter"],1],["How many continents are there?",["5","6","7","8"],2],
+["Which is the largest ocean?",["Atlantic","Indian","Arctic","Pacific"],3],["What is the currency of Japan?",["Dollar","Yen","Euro","Pound"],1]],
+medium:[
+["Which planet is known for its prominent rings?",["Earth","Saturn","Mars","Venus"],1],["Who wrote Romeo and Juliet?",["Charles Dickens","William Shakespeare","Chinua Achebe","Mark Twain"],1],
+["What is the chemical symbol for gold?",["Ag","Au","Go","Gd"],1],["Which organ pumps blood around the body?",["Lungs","Brain","Heart","Liver"],2],
+["What is the largest continent?",["Africa","Asia","Europe","Australia"],1],["How many sides does a hexagon have?",["5","6","7","8"],1]],
+hard:[
+["What is the smallest prime number greater than 50?",["51","53","55","57"],1],["Which gas makes up most of Earth's atmosphere?",["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],2],
+["What is the SI unit of electric resistance?",["Volt","Watt","Ohm","Ampere"],2],["Which blood type is commonly called the universal red-cell donor?",["AB positive","O negative","A positive","B negative"],1],
+["In which year did Nigeria gain independence?",["1957","1960","1963","1966"],1],["Which scientist developed general relativity?",["Isaac Newton","Albert Einstein","Galileo Galilei","Nikola Tesla"],1]]}
+};
+
+// ACHIEVEMENTS
+const achievementList=[
+{id:"first_game",icon:"🎮",name:"First Steps",description:"Complete your first game.",condition:()=>totalGames>=1},
+{id:"first_win",icon:"🏅",name:"First Victory",description:"Answer a question correctly.",condition:()=>totalCorrect>=1},
+{id:"perfect",icon:"🏆",name:"Perfect Score",description:"Get all five questions correct in one round.",condition:()=>bestPerfect},
+{id:"ten_games",icon:"🔥",name:"Dedicated Player",description:"Complete 10 games.",condition:()=>totalGames>=10},
+{id:"hundred_coins",icon:"💰",name:"Coin Collector",description:"Collect 100 coins.",condition:()=>coins>=100},
+{id:"level_five",icon:"⭐",name:"Rising Star",description:"Reach level 5.",condition:()=>getLevel()>=5},
+{id:"streak_three",icon:"⚡",name:"On Fire",description:"Get 3 correct answers in a row.",condition:()=>bestStreak>=3}
+];
+let bestPerfect=readText("zdBestPerfect","false")==="true";
+
+function getLevel(){return Math.floor(totalXP/100)+1}
+function getXPProgress(){return totalXP%100}
+function saveData(){
+ try{
+  localStorage.setItem("zdCoins",coins);localStorage.setItem("zdBestScore",bestScore);
+  localStorage.setItem("zdGames",totalGames);localStorage.setItem("zdXP",totalXP);
+  localStorage.setItem("zdPlayerName",playerName);localStorage.setItem("zdAchievements",JSON.stringify(achievements));
+  localStorage.setItem("zdTotalCorrect",totalCorrect);localStorage.setItem("zdTotalAnswered",totalAnswered);
+  localStorage.setItem("zdSound",String(soundEnabled));localStorage.setItem("zdBestPerfect",String(bestPerfect));
+ }catch(e){console.warn("Could not save game data",e)}
+}
+function updateStats(){
+ const level=getLevel(),progress=getXPProgress(),name=playerName||"Player",initial=playerName?playerName.charAt(0).toUpperCase():"P";
+ setText("coinCount",coins);setText("homeCoins",coins);setText("bestScore",bestScore);setText("totalGames",totalGames);
+ setText("homePlayerName",name);setText("homeAvatar",initial);setText("homePlayerLevel","LEVEL "+level);
+ setText("homeXP",progress+" / 100 XP");setWidth("homeXPBar",progress);
+ setText("profileDisplayName",name);setText("profileAvatar",initial);setText("profileLevel","LEVEL "+level);
+ setText("profileXP",totalXP);setText("profileGames",totalGames);setText("profileCoins",coins);
+ setText("profileXPProgress",progress+" / 100 XP");setWidth("profileXPBar",progress);
+ setText("soundToggle",soundEnabled?"🔊 SOUND ON":"🔇 SOUND OFF");renderAchievements();
+}
+function setText(id,value){document.getElementById(id).textContent=value}
+function setWidth(id,value){document.getElementById(id).style.width=value+"%"}
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function openProfile(){updateStats();document.getElementById("playerNameInput").value=playerName;showScreen("profileScreen")}
+function saveProfile(){
+ const name=document.getElementById("playerNameInput").value.trim();
+ if(name.length<2){alert("Please enter a name with at least 2 characters.");return}
+ playerName=name.substring(0,20);saveData();updateStats();alert("Player profile saved successfully!");
+}
+function toggleSound(){soundEnabled=!soundEnabled;saveData();updateStats()}
+let audioContext=null;
+function playSound(correct){
+ if(!soundEnabled)return;
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  if(!audioContext)audioContext=new AC();if(audioContext.state==="suspended")audioContext.resume();
+  const osc=audioContext.createOscillator(),gain=audioContext.createGain();
+  osc.connect(gain);gain.connect(audioContext.destination);osc.type="sine";
+  osc.frequency.value=correct?820:220;gain.gain.setValueAtTime(.12,audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+.22);
+  osc.start();osc.stop(audioContext.currentTime+.22);
+ }catch(e){console.log("Sound unavailable",e)}
+}
+function renderAchievements(){
+ const grid=document.getElementById("achievementGrid");grid.innerHTML="";
+ const count=achievements.length;setText("achievementCount","("+count+"/"+achievementList.length+" unlocked)");
+ achievementList.forEach(item=>{
+  const unlocked=achievements.includes(item.id),card=document.createElement("div");
+  card.className="achievement "+(unlocked?"unlocked":"locked");
+  const icon=document.createElement("span");icon.className="badge-icon";icon.textContent=item.icon;
+  const title=document.createElement("strong");title.textContent=item.name;
+  const desc=document.createElement("small");desc.textContent=unlocked?"UNLOCKED":item.description;
+  card.append(icon,title,desc);grid.appendChild(card);
+ });
+}
+function unlockAchievements(){
+ let newlyUnlocked=[];
+ achievementList.forEach(item=>{
+  if(item.condition()&&!achievements.includes(item.id)){achievements.push(item.id);newlyUnlocked.push(item.name)}
+ });
+ saveData();
+ if(newlyUnlocked.length)alert("🏆 ACHIEVEMENT UNLOCKED!\n\n"+newlyUnlocked.join("\n"));
+}
+document.querySelectorAll(".difficulty").forEach(button=>button.addEventListener("click",()=>{
+ document.querySelectorAll(".difficulty").forEach(b=>b.classList.remove("selected"));
+ button.classList.add("selected");selectedDifficulty=button.dataset.level;
+}));
+document.querySelectorAll(".category").forEach(button=>button.addEventListener("click",()=>{
+ document.querySelectorAll(".category").forEach(b=>b.classList.remove("selected"));
+ button.classList.add("selected");selectedCategory=button.dataset.category;
+}));
+function startGame(){
+ clearInterval(timerInterval);clearTimeout(answerTimeout);
+ score=0;correctAnswers=0;currentQuestion=0;currentStreak=0;bestStreak=0;gameFinished=false;
+ timeLeft=selectedDifficulty==="easy"?90:selectedDifficulty==="medium"?60:40;
+ const pool=questionBank[selectedCategory][selectedDifficulty];selectedQuestions=[...pool];
+ for(let i=selectedQuestions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[selectedQuestions[i],selectedQuestions[j]]=[selectedQuestions[j],selectedQuestions[i]]}
+ selectedQuestions=selectedQuestions.slice(0,TOTAL_QUESTIONS);
+ setText("currentScore",score);setText("timer",timeLeft);setText("progressBar","");setWidth("progressBar",0);setText("feedback","");
+ showScreen("gameScreen");showQuestion();
+ timerInterval=setInterval(()=>{timeLeft--;setText("timer",timeLeft);if(timeLeft<=0)finishGame()},1000);
+}
+function showQuestion(){
+ if(gameFinished)return;
+ if(currentQuestion>=selectedQuestions.length){finishGame();return}
+ const q=selectedQuestions[currentQuestion];setText("questionNumber",currentQuestion+1);setText("questionText",q[0]);
+ setWidth("progressBar",(currentQuestion/TOTAL_QUESTIONS)*100);
+ const box=document.getElementById("answersContainer");box.innerHTML="";
+ q[1].forEach((answer,index)=>{
+  const button=document.createElement("button");button.className="answer";button.textContent=answer;
+  button.addEventListener("click",()=>checkAnswer(index));box.appendChild(button);
+ });
+}
+function checkAnswer(index){
+ if(gameFinished)return;
+ const q=selectedQuestions[currentQuestion],buttons=[...document.querySelectorAll(".answer")];
+ buttons.forEach(b=>b.disabled=true);totalAnswered++;
+ if(index===q[2]){
+  correctAnswers++;totalCorrect++;currentStreak++;bestStreak=Math.max(bestStreak,currentStreak);
+  const base=selectedDifficulty==="easy"?10:selectedDifficulty==="medium"?15:20;
+  const streakBonus=currentStreak>=3?5:0;score+=base+streakBonus;
+  buttons[index].classList.add("correct");
+  setText("feedback",streakBonus?"CORRECT! +"+(base+streakBonus)+" POINTS (STREAK BONUS)":"CORRECT! +"+base+" POINTS");
+  playSound(true);
+ }else{
+  currentStreak=0;buttons[index].classList.add("wrong");buttons[q[2]].classList.add("correct");
+  setText("feedback","NOT QUITE! The correct answer is "+q[1][q[2]]+".");playSound(false);
+ }
+ setText("currentScore",score);saveData();currentQuestion++;
+ answerTimeout=setTimeout(()=>{if(gameFinished)return;if(currentQuestion>=selectedQuestions.length)finishGame();else showQuestion()},850);
+}
+function finishGame(){
+ if(gameFinished)return;gameFinished=true;clearInterval(timerInterval);clearTimeout(answerTimeout);
+ totalGames++;const earnedCoins=correctAnswers*5,earnedXP=correctAnswers*20+(correctAnswers===5?25:0);
+ coins+=earnedCoins;const oldLevel=getLevel();totalXP+=earnedXP;const newLevel=getLevel();
+ if(score>bestScore)bestScore=score;if(correctAnswers===5)bestPerfect=true;
+ const maxScore=(selectedDifficulty==="easy"?50:selectedDifficulty==="medium"?75:100)+10;
+ const percent=Math.round((score/maxScore)*100);
+ setText("finalScore",score);setText("resultCorrect",correctAnswers+"/5");
+ setText("resultAccuracy",Math.round((correctAnswers/5)*100)+"%");
+ setText("earnedCoins",earnedCoins);setText("earnedXP",earnedXP);
+ setText("levelMessage",newLevel>oldLevel?"🎉 LEVEL UP! You are now Level "+newLevel+"!":"Keep playing to reach your next level!");
+ if(correctAnswers===5){setText("resultTitle","BRAIN MASTER!");setText("resultMessage","Perfect performance! You conquered every question.")}
+ else if(percent>=60){setText("resultTitle","EXCELLENT WORK!");setText("resultMessage","Great performance! Your mind is getting sharper.")}
+ else if(percent>=40){setText("resultTitle","GOOD EFFORT!");setText("resultMessage","You're making progress. Keep challenging yourself.")}
+ else{setText("resultTitle","KEEP TRYING!");setText("resultMessage","Every challenge makes you stronger. Give it another shot!")}
+ setWidth("progressBar",100);unlockAchievements();saveData();updateStats();showScreen("resultScreen");
+}
+function playAgain(){startGame()}
+function goHome(){clearInterval(timerInterval);clearTimeout(answerTimeout);gameFinished=true;updateStats();showScreen("homeScreen")}
+function quitGame(){
+ if(confirm("Are you sure you want to quit? Your current round will not be saved.")){
+  clearInterval(timerInterval);clearTimeout(answerTimeout);gameFinished=true;showScreen("homeScreen");
+ }
+}
+updateStats();
+</script>
+</body>
+</html>
