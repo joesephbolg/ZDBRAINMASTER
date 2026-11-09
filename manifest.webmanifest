@@ -3,6 +3,7 @@
   "name": "ZD Brain Master",
   "short_name": "ZD Brain",
   "description": "Think. Play. Conquer. Challenge your brain.",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -20,7 +21,7 @@
       "src": "./launchericon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
