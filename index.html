@@ -1,9 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07111f">
+
+<!-- PWA CONNECTIONS -->
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="apple-touch-icon" href="./icon.svg">
+
 <title>ZD Brain Master | Version 2.3</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -375,7 +382,9 @@ function finishGame(){
  totalGames++;const earnedCoins=correctAnswers*5,earnedXP=correctAnswers*20+(correctAnswers===5?25:0);
  coins+=earnedCoins;const oldLevel=getLevel();totalXP+=earnedXP;const newLevel=getLevel();
  if(score>bestScore)bestScore=score;if(correctAnswers===5)bestPerfect=true;
- const maxScore=(selectedDifficulty==="easy"?50:selectedDifficulty==="medium"?75:100)+10;
+
+ // CORRECTED MAXIMUM SCORE: INCLUDES ALL POSSIBLE STREAK BONUSES
+ const maxScore=(selectedDifficulty==="easy"?50:selectedDifficulty==="medium"?75:100)+15;
  const percent=Math.round((score/maxScore)*100);
  setText("finalScore",score);setText("resultCorrect",correctAnswers+"/5");
  setText("resultAccuracy",Math.round((correctAnswers/5)*100)+"%");
@@ -394,7 +403,17 @@ function quitGame(){
   clearInterval(timerInterval);clearTimeout(answerTimeout);gameFinished=true;showScreen("homeScreen");
  }
 }
+
 updateStats();
+
+// SERVICE WORKER REGISTRATION FOR PWA AND OFFLINE SUPPORT
+if ("serviceWorker" in navigator) {
+ window.addEventListener("load", () => {
+  navigator.serviceWorker.register("./sw.js").catch(error => {
+   console.log("Offline support unavailable:", error);
+  });
+ });
+}
 </script>
 </body>
 </html>
